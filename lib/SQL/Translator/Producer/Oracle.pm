@@ -732,13 +732,22 @@ sub create_view {
     my ($view, $options) = @_;
     my $qt = $options->{quote_table_names};
     my $view_name = quote($view->name,$qt);
+    my %extra = $view->extra;
+
+    my $view_type = 'VIEW';
+    my $view_options = '';
+    if ( exists $extra{materialized} && $extra{materialized} ) {
+        $view_type = 'MATERIALIZED VIEW';
+        $view_options = $extra{materialized};
+    }
 
     my @create;
-    push @create, qq[DROP VIEW $view_name]
+    push @create, qq[DROP $view_type $view_name]
         if $options->{add_drop_view};
 
-    push @create, sprintf("CREATE VIEW %s AS\n%s",
+    push @create, sprintf("CREATE $view_type %s %s AS\n%s",
                       $view_name,
+                      $view_options,
                       $view->sql);
 
     return \@create;
