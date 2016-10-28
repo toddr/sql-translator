@@ -735,17 +735,18 @@ sub create_view {
     my %extra = $view->extra;
 
     my $view_type = 'VIEW';
-    my $view_options = '';
+    my $view_options = ' ';
     if ( exists $extra{materialized} && $extra{materialized} ) {
         $view_type = 'MATERIALIZED VIEW';
-        $view_options = $extra{materialized};
+        $view_options .= $extra{materialized} . ' ';
     }
 
     my @create;
     push @create, qq[DROP $view_type $view_name]
         if $options->{add_drop_view};
 
-    push @create, sprintf("CREATE $view_type %s %s AS\n%s",
+    push @create, sprintf("CREATE %s %s%sAS\n%s",
+                      $view_type,
                       $view_name,
                       $view_options,
                       $view->sql);
